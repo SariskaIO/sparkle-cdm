@@ -57,8 +57,12 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <list>
-#include <stdio.h>
+#ifdef __cplusplus
+ #include <list>
+#endif
+#ifdef __cplusplus
+ #include <stdio.h>
+ #endif
 
 #ifndef EXTERNAL
 #ifdef _MSVC_LANG
