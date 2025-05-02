@@ -9,6 +9,8 @@ sparkle_cdm_sources = [
   'system.cpp',
 ]
 
+sparkle_public_inc = include_directories('.')
+
 sparkle_cdm_headers = [
   'open_cdm.h',
   'open_cdm_adapter.h'
@@ -37,8 +39,10 @@ pkg.generate(sparkle_cdm_lib,
       subdirs: include_subdir
 )
 
-sparkle_cdm_dep = declare_dependency(link_with: sparkle_cdm_lib)
-
+sparkle_cdm_dep = declare_dependency(
+  include_directories: sparkle_public_inc,
+  link_with: sparkle_cdm_lib
+)
 subdir('gst')
 
 subdir('clearkey')
