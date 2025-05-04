@@ -6,8 +6,7 @@ add_project_arguments(['-I' + inc_path], language: 'cpp')
 subdir('mock-module')
 
 sparkle_cdm_sources = [
-  'system.cpp',
-  'widevine_mac_override.c'
+  'system.cpp'
 ]
 
 sparkle_public_inc = include_directories('.')
