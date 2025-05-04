@@ -211,21 +211,36 @@ OpenCDMError opencdm_is_type_supported(const char keySystem[],
     const char mimeType[])
 {
     GST_DEBUG("is_type_supported: %s -- %s", keySystem, mimeType);
+    
+    // Log the plugin count
+    GST_DEBUG("Number of available plugins: %d", g_list_length(s_plugins));
+    
     OpenCDMError result = ERROR_FAIL;
     IsTypeSupportedFunc is_type_supported;
+    
     for (GList* l = s_plugins; l != nullptr; l = l->next) {
         GModule* module = (GModule*)l->data;
+        GST_DEBUG("Checking plugin: %s", g_module_name(module) ? g_module_name(module) : "unnamed");
+        
         if (!g_module_symbol(module, "opencdm_is_type_supported",
-                (gpointer*)&is_type_supported))
+                (gpointer*)&is_type_supported)) {
+            GST_DEBUG("Symbol 'opencdm_is_type_supported' not found in plugin");
             continue;
+        }
+        
+        GST_DEBUG("Calling is_type_supported function from plugin");
         result = is_type_supported(keySystem, mimeType);
+        GST_DEBUG("Plugin returned result: %d", result);
 
         if (result == ERROR_NONE) {
+            GST_DEBUG("Support found for key system");
             // FIXME: No ranking for now, first come, first served.
             cacheKeySystemCheck(module, keySystem);
             return result;
         }
     }
+    
+    GST_DEBUG("No support found for key system");
     return ERROR_FAIL;
 }
 
