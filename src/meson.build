@@ -7,6 +7,7 @@ subdir('mock-module')
 
 sparkle_cdm_sources = [
   'system.cpp',
+  'widevine_mac_override.c'
 ]
 
 sparkle_public_inc = include_directories('.')
