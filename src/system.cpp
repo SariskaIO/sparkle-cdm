@@ -94,7 +94,7 @@ void cacheKeySystemCheck(GModule* module, const char* keySystem)
 GModule* moduleForKeySystem(const char* keySystem)
 {
     auto* module = (GModule*)g_hash_table_lookup(s_modules, keySystem);
-    GST_DEBUG("Module lookup result for %s: %s", keySystem,
+    GST_DEBUG("Protection data received from origin %s: %s", keySystem,
         module ? g_module_name(module) : "");
     if (!module)
       GST_ERROR("Module not found for key system %s", keySystem);
@@ -103,12 +103,16 @@ GModule* moduleForKeySystem(const char* keySystem)
 
 void cacheSystem(struct OpenCDMSystem* system, GModule* module)
 {
+    if (!system) {
+        GST_ERROR("Cannot cache NULL system for module %s", g_module_name(module));
+        return; // Don't cache NULL systems
+    }
+    
     if (!s_systems)
         s_systems = g_hash_table_new(nullptr, nullptr);
-    GST_DEBUG("Caching module %s as system %p holder", g_module_name(module),
-        system);
-    if (system)
-        g_hash_table_insert(s_systems, (gpointer)system, module);
+    
+    GST_DEBUG("Caching module %s as system %p holder", g_module_name(module), system);
+    g_hash_table_insert(s_systems, (gpointer)system, module);
 }
 
 GModule* moduleForSystem(struct OpenCDMSystem* system)
