@@ -131,7 +131,7 @@ spklProcessChallenge (G_GNUC_UNUSED struct OpenCDMSession *session,
 
   g_autoptr (GstBus) bus = gst_element_get_bus (GST_ELEMENT_CAST (self));
   g_autoptr (GBytes) challengeData =
-      g_bytes_new (challenge + 7, challengeLength - 7);
+    g_bytes_new (challenge, challengeLength);
   GST_MEMDUMP_OBJECT (self, "Challenge:", challenge + 7, challengeLength - 7);
   g_autoptr (GstBuffer) challengeBuffer =
       gst_buffer_new_wrapped_bytes (challengeData);
