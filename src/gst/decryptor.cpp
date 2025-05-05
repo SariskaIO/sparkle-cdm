@@ -124,10 +124,10 @@ spklProcessChallenge (G_GNUC_UNUSED struct OpenCDMSession *session,
   auto *self = SPKL_DECRYPTOR (userData);
 
   GST_DEBUG_OBJECT (self, "Challenge received from CDM");
-  if (challenge[0] != '0') {
-    GST_DEBUG_OBJECT (self, "Ignoring message different than license-request");
-    return;
-  }
+  // if (challenge[0] != '0') {
+  //   GST_DEBUG_OBJECT (self, "Ignoring message different than license-request");
+  //   return;
+  // }
 
   g_autoptr (GstBus) bus = gst_element_get_bus (GST_ELEMENT_CAST (self));
   g_autoptr (GBytes) challengeData =
