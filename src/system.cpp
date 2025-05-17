@@ -219,32 +219,61 @@ OpenCDMError opencdm_is_type_supported(const char keySystem[],
     // Log the plugin count
     GST_DEBUG("Number of available plugins: %d", g_list_length(s_plugins));
     
+    // Add more detailed information about all available plugins
+    GST_DEBUG("===== List of all available plugins =====");
+    int plugin_index = 0;
+    for (GList* plugin_list = s_plugins; plugin_list != nullptr; plugin_list = plugin_list->next) {
+        GModule* plugin_module = (GModule*)plugin_list->data;
+        GST_DEBUG("  Plugin #%d: %s", plugin_index++, 
+                    g_module_name(plugin_module) ? g_module_name(plugin_module) : "unnamed");
+    }
+    GST_DEBUG("=======================================");
+    
     OpenCDMError result = ERROR_FAIL;
     IsTypeSupportedFunc is_type_supported;
     
     for (GList* l = s_plugins; l != nullptr; l = l->next) {
         GModule* module = (GModule*)l->data;
-        GST_DEBUG("Checking plugin: %s", g_module_name(module) ? g_module_name(module) : "unnamed");
+        const char* module_name = g_module_name(module) ? g_module_name(module) : "unnamed";
+        GST_DEBUG("Checking plugin: %s", module_name);
+        
+        // Log the module address to help track which instance is being used
+        GST_DEBUG("  Module address: %p", module);
         
         if (!g_module_symbol(module, "opencdm_is_type_supported",
                 (gpointer*)&is_type_supported)) {
-            GST_DEBUG("Symbol 'opencdm_is_type_supported' not found in plugin");
+            GST_DEBUG("  Symbol 'opencdm_is_type_supported' not found in plugin %s", module_name);
+            
+            // Add additional debug - try to list available symbols in the module
+            gpointer symbol_value;
+            if (g_module_symbol(module, "opencdm_create_system", &symbol_value)) {
+                GST_DEBUG("  However, module has symbol 'opencdm_create_system' at %p", symbol_value);
+            }
+            
             continue;
         }
         
-        GST_DEBUG("Calling is_type_supported function from plugin");
+        GST_DEBUG("  Calling is_type_supported function from plugin %s", module_name);
+        GST_DEBUG("  Function address: %p", is_type_supported);
+        
         result = is_type_supported(keySystem, mimeType);
-        GST_DEBUG("Plugin returned result: %d", result);
-
+        GST_DEBUG("  Plugin %s returned result: %d", module_name, result);
+        
         if (result == ERROR_NONE) {
-            GST_DEBUG("Support found for key system");
+            GST_DEBUG("SUPPORT FOUND: Key system '%s' is supported by module '%s'", 
+                        keySystem, module_name);
+            
+            // Log more details about the module that will be used
+            GST_DEBUG("  Selected module path: %s", module_name);
+            GST_DEBUG("  Selected module address: %p", module);
+            
             // FIXME: No ranking for now, first come, first served.
             cacheKeySystemCheck(module, keySystem);
             return result;
         }
     }
     
-    GST_DEBUG("No support found for key system");
+    GST_DEBUG("No support found for key system '%s'", keySystem);
     return ERROR_FAIL;
 }
 
